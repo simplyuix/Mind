@@ -37,7 +37,41 @@ app.post('/api/v1/signup',async (req,res)=>{
      }
      })
 
+app.get('/api/v1/signin',async (req,res)=>{
 
+
+     const username = req.body.username ;
+     const password = req.body.password ; 
+     try {
+     const usr = await UserModel.findOne({
+        username ,
+        password
+
+    })
+    const token = jwt.sign({
+        usrid : usr?._id,
+        username : usr?.username 
+
+    },
+    process.env.secretKey!);
+    console.log("dbdfb"+process.env.secretKey)
+
+     res.json({
+        username,
+        password,
+        token,
+        message :"user signed found"
+     })
+     }
+     catch(e){
+        res.status(404).json({
+            message : "User not  found!",
+            
+
+        })
+        
+     }
+     })
 app.post('/api/vi/content',(req,res)=>{
 
 })

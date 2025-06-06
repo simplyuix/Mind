@@ -1,26 +1,29 @@
 import { NextFunction, Request, Response } from "express";
-import jwt from 'jsonwebtoken' ;
+import jwt, { JwtPayload } from "jsonwebtoken";
 
 declare global {
     namespace Express {
         interface Request {
-            userid?: string;
+            userId?: string;
         }
     }
 }
 
-export const usrMiddleware = (req : Request , res : Response , next : NextFunction)=>{
-    const header = req.headers["authorization"]
-    const  decoded = jwt.verify(header as string ,process.env.secretKey as string) as any
-    console.log("Decoded JWT:", decoded); // ✅ Add this line
-    console.log("decoded.userid:", decoded.userid); 
-    if(decoded){
-        req.userid = decoded.userid ;
+export const usrMiddleware = (req: Request, res: Response, next: NextFunction) => {
+    const header = req.headers["authorization"];
+    const decoded = jwt.verify(header as string, process.env.secretKey!)
+    if (decoded) {
+        if (typeof decoded === "string") {
+            res.status(403).json({
+                message: "You are not logged in"
+            })
+            return;    
+        }
+        req.userId = (decoded as JwtPayload).userId;
         next()
-    }else{
+    } else {
         res.status(403).json({
-            message : "Not loggedin!"
+            message: "You are not logged in"
         })
     }
-
-} 
+}

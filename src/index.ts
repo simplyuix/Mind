@@ -6,7 +6,8 @@ import express from "express" ;
 import mongoose from "mongoose" ;
 import jwt from "jsonwebtoken" ;
 import dotenv from 'dotenv';
-import { UserModel } from "./db";
+import { UserModel,ContentModel } from "./db";
+import {usrMiddleware} from "./middleware"
 
 dotenv.config();
 
@@ -37,7 +38,7 @@ app.post('/api/v1/signup',async (req,res)=>{
      }
      })
 
-app.get('/api/v1/signin',async (req,res)=>{
+app.post('/api/v1/signin',async (req,res)=>{
 
 
      const username = req.body.username ;
@@ -49,13 +50,17 @@ app.get('/api/v1/signin',async (req,res)=>{
 
     })
     const token = jwt.sign({
-        usrid : usr?._id,
-        username : usr?.username 
-
+        userid : usr?._id
     },
-    process.env.secretKey!);
-    console.log("dbdfb"+process.env.secretKey)
 
+    process.env.secretKey!);
+    if (!usr) {  
+            return res.status(404).json({
+                message: "Invalid credentials"
+            });
+        }
+        
+        console.log("User found:", usr._id);
      res.json({
         username,
         password,
@@ -72,7 +77,23 @@ app.get('/api/v1/signin',async (req,res)=>{
         
      }
      })
-app.post('/api/vi/content',(req,res)=>{
+
+
+app.post('/api/v1/content', usrMiddleware, async (req, res) => {
+    
+    const title = req.body.title ;
+    const link = req.body.link ;
+   await ContentModel.create({
+    link,
+    title,
+    userid : req.userid,
+    tag: []
+
+   })
+    res.json({
+    message : "Content Added!"
+   })
+
 
 })
 

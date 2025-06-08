@@ -18,7 +18,10 @@ const app = express() ;
 const con = mongoose.connect(process.env.MONGODB_URI!)
 app.use(express.json())
 app.use(cors())
-
+app.use(cors({
+    origin: ['http://localhost:3001', 'http://localhost:3000','http://localhost:5173'], 
+    credentials: true
+}))
 
 app.post('/api/v1/signup',async (req,res)=>{
 
@@ -103,7 +106,7 @@ app.delete("/api/v1/content", usrMiddleware, async (req, res) => {
     const contentId = req.body.contentId;
 
     await ContentModel.deleteMany({
-        contentId,
+         _id: contentId,
         userId: req.userId
     })
 
@@ -158,7 +161,7 @@ app.get("/api/v1/brain/:shareLink", async (req, res) => {
         })
         return;
     }
-    // userId
+   
     const content = await ContentModel.find({
         userId: link.userId
     })
